@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -27,11 +28,16 @@ public class NamespaceService {
     public DirectoryNode getRoot() {return rootNamespace;}
 
     public FilesystemNode resolvePath(String fullPath){
-        if (fullPath==null || fullPath.equals("/")||fullPath.trim().isEmpty()){
+        if (fullPath == null || fullPath.trim().isEmpty() || fullPath.trim().equals("/")) {
             return rootNamespace;
         }
-        Queue<String> segment= new LinkedList<>(Arrays.asList(fullPath.replaceAll("^/+", "").split("/")));
-         System.out.println("Path steps"+segment.size());
+        
+        Queue<String> segment = Arrays.stream(fullPath.split("/"))
+                .map((String seg)-> seg.trim())
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toCollection(LinkedList::new));
+        
+        System.out.println("Path steps: " + segment.size());
         return rootNamespace.resolve(segment);
     }
     public void createFileComponent(ComponentRequest request){
@@ -56,7 +62,7 @@ public class NamespaceService {
         System.out.println("show command for path "+ request);
         FilesystemNode resolvedComponent = resolvePath(request);
         if (!(resolvedComponent instanceof DirectoryNode targetComponent)){
-            throw new IllegalArgumentException("Cannot create in a file !!!");
+            throw new IllegalArgumentException("Cannot show contents of a file !!!");
         }
         return targetComponent.getChildren();
     }

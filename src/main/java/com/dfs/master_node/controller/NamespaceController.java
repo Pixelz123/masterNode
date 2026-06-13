@@ -25,6 +25,7 @@ public class NamespaceController {
     }
      
     public record ComponentRequest(String ComponentName ,FilesystemComponentType ComponentType, String ComponentPath){}
+    public record PathRequest(String path){}
 
     // @PostMapping("/getNodeList")
     // public Mono<List<String>> getNodeListForFile(@RequestBody String filePath){
@@ -43,9 +44,9 @@ public class NamespaceController {
 
     // }
     @PostMapping("/show")
-    public Mono<String> showChildren(@RequestBody String path){
+    public Mono<String> showChildren(@RequestBody PathRequest request){
        return Mono.fromCallable(()->{
-            return namespaceService.showFileComponent(path);
+            return namespaceService.showFileComponent(request.path());
        });
     }
     @GetMapping("/test")

@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GarbageColletorService {
+public class GarbageCollectorService {
    private final ConcurrentLinkedQueue<Long> pendingDeletions= new ConcurrentLinkedQueue<>();
    
    public void markForDeletion(List<Long> chunkId){
