@@ -10,8 +10,9 @@ public class FileNode extends FilesystemNode {
            this.chunkIds = null;
     }
     @Override
-    void resolve(Queue<String> pathSegment) {
-        System.out.println("/"+super.name);
+    public FilesystemNode resolve(Queue<String> pathSegment) {
+        if (pathSegment.isEmpty()) return this;
+        throw new RuntimeException("File Not Found !!!");
     }
     public List<Long> getChunkIds(){ return chunkIds;}
 }
