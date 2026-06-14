@@ -1,5 +1,6 @@
 package com.dfs.master_node.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -46,17 +47,49 @@ public class NamespaceService {
             throw new IllegalArgumentException("Cannot create in a file !!!");
         }
         FilesystemNode newNode = switch(request.ComponentType()){
-            case DIRECTORY_COMPONENT -> FilesystemComponentType.DIRECTORY_COMPONENT.createComponent(new FileNodeContext(request.ComponentName()));
-            case FILE_COMPONENT -> FilesystemComponentType.FILE_COMPONENT.createComponent(new FileNodeContext(request.ComponentName(),List.<Long>of(100L)));
+            case DIRECTORY_COMPONENT ->
+             FilesystemComponentType.DIRECTORY_COMPONENT.createComponent(new FileNodeContext(request.ComponentName()));
+            case FILE_COMPONENT ->
+             FilesystemComponentType.FILE_COMPONENT.createComponent(new FileNodeContext(request.ComponentName(),List.<Long>of(100L)));
         };
         targetComponent.addChildren(newNode);
-        System.out.println(targetComponent.getChildren());
-        // for (String child: targetComponent.)
 
     }
     public void deleteFileComponent(ComponentRequest request){
-        FilesystemNode resolvedComponent = resolvePath(request.ComponentPath());
-         
+        int lastSlashIndex = request.ComponentPath().lastIndexOf('/');
+        String parentPath = lastSlashIndex <=0 ?"/": request.ComponentPath().substring(0,lastSlashIndex);
+        String targetName = request.ComponentPath().substring(lastSlashIndex+1);
+        
+        FilesystemNode resolvedComponent = resolvePath(parentPath);
+        if (!(resolvedComponent instanceof DirectoryNode targetParent)){
+            throw new IllegalArgumentException("Corrupt File Path");
+        }
+        FilesystemNode targetComponent;
+        targetParent.getLock().readLock().lock();
+        try{
+            targetComponent= targetParent.removeChild(targetName);
+            if (targetComponent==null){
+                throw new IllegalArgumentException("Component does not exist !!!");
+            }
+
+        }finally{
+            targetParent.getLock().readLock().unlock();
+        }
+        List<Long> orphanedChunk = new ArrayList<>();
+        getOrphanedChunk(targetComponent, orphanedChunk);
+        if (!orphanedChunk.isEmpty()){
+            // TODO: gc implementation later 
+        } 
+    }
+
+    private void getOrphanedChunk(FilesystemNode root, List<Long> chunkIds){
+        if (root instanceof FileNode file){
+            chunkIds.addAll(file.getChunkIds());
+        }else if (root instanceof DirectoryNode dir){
+            for (FilesystemNode child : dir.getChildren().values()){
+                getOrphanedChunk(child, chunkIds);
+            }
+        }
     }
     public String showFileComponent(String request){
         System.out.println("show command for path "+ request);
@@ -64,6 +97,6 @@ public class NamespaceService {
         if (!(resolvedComponent instanceof DirectoryNode targetComponent)){
             throw new IllegalArgumentException("Cannot show contents of a file !!!");
         }
-        return targetComponent.getChildren();
+        return targetComponent.getContent();
     }
 }

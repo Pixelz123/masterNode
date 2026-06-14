@@ -39,10 +39,13 @@ public class NamespaceController {
         }
        ); 
     }
-    // @PostMapping("/delete")
-    // public Mono<String> deleteComponent(@RequestBody ComponentRequest request){
-
-    // }
+    @PostMapping("/delete")
+    public Mono<String> deleteComponent(@RequestBody ComponentRequest request){
+       return Mono.fromCallable(()->{
+           namespaceService.deleteFileComponent(request);
+           return "deleted!!!";
+       });
+    }
     @PostMapping("/show")
     public Mono<String> showChildren(@RequestBody PathRequest request){
        return Mono.fromCallable(()->{

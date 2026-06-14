@@ -2,7 +2,7 @@ package com.dfs.master_node.namespace;
 
 import java.util.List;
 
-public record CreateFileCommand(String fileName ,List<Long> chunkIds) implements FilesystemCommand{
+public record CreateComponentCommand(String fileName ,List<Long> chunkIds) implements FilesystemCommand{
 
     @Override
     public void execute(DirectoryNode node) {

@@ -31,10 +31,13 @@ public class DirectoryNode extends FilesystemNode {
     public void addChildren(FilesystemNode child){ children.put(child.getName(),child);}
     public FilesystemNode removeChild(String name){ return children.remove(name);}
     public FilesystemNode getChild(String name){ return children.get(name);}
-    public String getChildren(){
+    public String getContent(){
         return children.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue().getClass().getSimpleName())
                 .collect(Collectors.joining(", ", "{", "}"));
+    }
+     public ConcurrentHashMap<String , FilesystemNode> getChildren(){
+        return children;
     }
 
 }
